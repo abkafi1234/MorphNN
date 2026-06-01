@@ -190,7 +190,7 @@ The MobileNetV2+Random Forest configuration achieved the highest macro F1 of 0.9
 
 Relative to the pure morphological baseline (Phase 1 RF, macro F1 = 0.901), MorphNN achieved a +6.0 percentage point improvement ($p < 0.001$), confirming that the PCA-compressed deep texture stream provides statistically significant complementary discriminative information beyond explicit geometric biometrics. Across all four phases, no single competing configuration simultaneously achieved higher macro F1, lower training time, and lower inference latency than MorphNN (MobileNetV2+RF), establishing it as the Pareto-optimal solution within the evaluated design space. 
 
-![Feature Importance Proposed Model (MobileNetV2+Random Forest)](feature_importance_hybrid.png)
+![Feature Importance Proposed Model (MobileNetV2+Random Forest)](RandomForest_Decision_XAI_Report.pdf)
 *Figure 2: Feature Importance Proposed Model (MobileNetV2+Random Forest)*
 
 ---
@@ -209,7 +209,7 @@ To independently evaluate generalization, we kept the 196-sample holdout set com
 
 MorphNN achieved a holdout macro F1 of 0.957, trailing the fine-tuned EfficientNet-B0 ceiling by only 0.006 and with near equivalent performance to other state-of-the-art methods discussed earlier. This near-parity is particularly notable given that Phase 3 required 312 ± 14.3 s of GPU-assisted fine-tuning and a 20.5 MB deployable footprint to reach its holdout ceiling, whereas MorphNN reached a statistically indistinguishable result in 14.2 ± 0.6 s with a 16.1 MB pipeline and no gradient updates. The consistency between cross-validation macro F1 and holdout macro F1 across all phases further confirms that no phase-level overfitting occurred during model selection. 
 
-![Confusion Matrix (Hold-out)](confusion_matrices_4phase.png)
+![Confusion Matrix (Hold-out)](confusion_matrices_4phase.pdf)
 *Figure 3: Confusion Matrix (Hold-out)*
 
 ---
@@ -220,12 +220,12 @@ Restricting the pipeline to the morphological vector alone (Phase 1 RF) yielded 
 
 **Error Mitigation:** Figure 4 shows how predictions change from the morphological baseline to MorphNN. Adding deep features, MorphNN resolved many of the baseline's confusions, because it correctly reclassified 7 false positive Measles and 4 false positive Chickenpox in Phase 1.
 
-![Error mitigation delta matrix](error_resolution_delta.png)
+![Error mitigation delta matrix](error_resolution_delta.pdf)
 *Figure 4: Error mitigation delta ($\Delta$) matrix between the Phase 1 morphological baseline and the proposed MorphNN framework.*
 
 **Multi-Dimensional Efficiency:** Figure 5 maps all configurations across accuracy, latency, and deployable footprint. End-to-end fine-tuning (Phase 3) incurs substantial training and storage costs for marginal accuracy gains over frozen counterparts. MorphNN (MobileNetV2+RF) occupies a strictly more favorable operating point: highest macro F1 (0.953), $22\times$ faster training than fine-tuned EfficientNet-B0, and a 21.5% smaller full-pipeline footprint (16.1 MB versus 20.5 MB).
 
-![Three-axis efficiency comparison](tradeoff.png)
+![Three-axis efficiency comparison](tradeoff(1).pdf)
 *Figure 5: Three-axis efficiency comparison (accuracy, latency, deployable footprint)*
 
 **Feature Contribution:** In the case of 20 independent runs of recursive feature elimination, *Confluence_Ratio* and *Avg_Area* are consistently selected as the most discriminant features for the morphological baseline, and for MorphNN, the top features are *CNN_Texture_1* and *Confluence_Ratio*. Furthermore, we found that adding additional features beyond the 18-dimensional vector did not help improve the results, and removing the lower-ranked features resulted in less consistent results from run to run ($p > 0.05$). The computational impact of the most influential features is summarized in Table 6.
@@ -244,11 +244,6 @@ Restricting the pipeline to the morphological vector alone (Phase 1 RF) yielded 
 
 The local explainability profiles for the classical morphological baseline are formalized in Figure 6, contrasting model success modes against systematic failure vectors via standardized feature Z-scores mapped against global Random Forest architectural weights.
 
-![Informed Decision Page 1](0.png)
-![Informed Decision Page 2](1.png)
-![Informed Decision Page 3](2.png)
-![Informed Decision Page 4](3.png)
-*Figure 6: Informed Decision Local Explainability Profiles*
 
 When the bilateral filter and adaptive thresholding pipeline cleanly isolates individual lesions, the classifier can rely strongly on robust spatial point-pattern metrics. Specifically, Chickenpox true positives are characterized by an exceptionally high lesion count ($Z > 1.5\sigma$) paired with a deeply negative sparsity score, mathematically reflecting the distinct clinical "crop" clustering behavior of varicella vesicles. 
 
@@ -268,7 +263,7 @@ The practical consequence is precisely targeted: the 6 false-positive Measles an
 
 To characterize real-world micro-architectural behavior under power-constrained conditions, CPU core frequency transients were logged across all four phases using a strict cache-warming protocol; five iterations were sampled exclusively from the median execution window to eliminate startup and thermal artifacts (Figure 7).
 
-![CPU core frequency transients](cpu_frequency_vs_time.png)
+![CPU core frequency transients](cpu_frequency_vs_time.pdf)
 *Figure 7: CPU core frequency transients across the four experimental phases.*
 
 Phase 1 (Random Forest) completes inference in 0.31 ms, operating entirely within the 2.0 GHz baseline band, confirming that tree-traversal operations bypass power-dense vector execution units entirely. Phases 2 and 3 sustain a heavy-workload footprint at the 2.5 GHz ceiling throughout identical EfficientNet-B0 tensor graph operations, diverging only at pipeline termination (12.1 ms versus 12.8 ms respectively). 
@@ -286,7 +281,7 @@ Figure 8 shows the web interface of the deployed application, titled the **Clini
 
 When a user uploads a clinical image scan, the application immediately generates a diagnostic evaluation result. The dashboard offers a straightforward visualization of the current system settings and makes all the computed shape-based statistics directly accessible and interpretable. It uses a hybrid fusion classifier to estimate prediction probabilities and specifically marks the final predicted diagnosis, allowing users to easily verify and interpret the results. Additionally, it supports any of the model configurations stated in Table 4.
 
-![App Interface](app_image.png)
+![App Interface](app_image.pdf)
 *Figure 8: Clinical Exanthem Hybrid Diagnostic Portal App Interface*
 
 ## Contextual Positioning
