@@ -21,7 +21,7 @@ Random Forest achieved the highest cross-validation macro F1 of 0.855 ± 0.020 a
 
 The failure analysis shows a common pattern for all three classifiers: most of the mistakes are Chickenpox samples classified as Measles, which is likely due to the fact that there is a subset of the Chickenpox images that have lesions with overlapping shape and redness patterns. Additionally, Phase 1 uses lightweight in-memory models; all classifiers achieve sub-millisecond inference time per image, setting a lower bound for later phases. 
 
-![Feature Importance for Classic model (Random Forest)](feature_importance_normal.png)
+![Feature Importance for Classic model (Random Forest)](feature_importance_normal.pdf)
 *Figure 1: Feature Importance for Classic model (Random Forest)*
 
 ---
