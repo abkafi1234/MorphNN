@@ -1,6 +1,6 @@
 # Results
 
-Phase 1 evaluates whether the eight-dimensional shape feature vector can distinguish between the two diseases, and Phases 2 and 3 evaluate frozen and fine-tuned deep learning baselines. Phase 4 introduces MorphNN and compares it in terms of accuracy, inference time, and model size. Therefore, it is a crucial step in the evaluation process, providing a comprehensive understanding of the model's performance. 
+Phase 1 evaluates whether the eight-dimensional shape feature vector can distinguish between the two diseases, and Phases 2 and 3 evaluate frozen and fine-tuned deep learning baselines. Phase 4 introduces Morphfuse and compares it in terms of accuracy, inference time, and model size. Therefore, it is a crucial step in the evaluation process, providing a comprehensive understanding of the model's performance. 
 
 All timing results are averaged over 20 runs on a fixed hardware setup (i5-12400H, 24 GB RAM, no GPU) using ONNX Runtime. Statistical comparisons are done using pairwise Wilcoxon signed-rank tests.
 
@@ -66,19 +66,19 @@ Full gradient-based optimization of all seven backbone architectures established
 
 Fine-tuning yielded consistent macro F1 improvements across all architectures, with EfficientNet-B0 reaching 0.941 ± 0.009 and ResNet34 achieving 0.934 ± 0.010. Wilcoxon signed-rank tests confirmed these gains over frozen counterparts were statistically significant for EfficientNet-B0 ($p = 0.018$) and ResNet34 ($p = 0.022$). 
 
-However, these accuracy gains were accompanied by severe computational penalties: EfficientNet-B0 required 312 ± 14.3 s of training (a $25\times$ increase over its frozen counterpart) and exportable model sizes remained substantial due to the fully updated float32 weight landscapes. Inference latencies were marginally elevated relative to Phase 2 owing to full-weight ONNX graph export overhead. Overall, Phase 3 serves as the most accurate but less efficient reference point for comparing the proposed MorphNN framework.
+However, these accuracy gains were accompanied by severe computational penalties: EfficientNet-B0 required 312 ± 14.3 s of training (a $25\times$ increase over its frozen counterpart) and exportable model sizes remained substantial due to the fully updated float32 weight landscapes. Inference latencies were marginally elevated relative to Phase 2 owing to full-weight ONNX graph export overhead. Overall, Phase 3 serves as the most accurate but less efficient reference point for comparing the proposed Morphfuse framework.
 
 ---
 
-## Phase 4: Proposed MorphNN Hybrid Fusion
+## Phase 4: Proposed Morphfuse Hybrid Fusion
 
-The MorphNN dual-stream architecture fuses PCA-compressed frozen CNN features ($\mathbb{R}^{10}$) with the eight deterministic morphological biometrics ($\mathbb{R}^{8}$) into a standardized 18-dimensional vector, evaluated across backbone-classifier pairings. 
+The Morphfuse dual-stream architecture fuses PCA-compressed frozen CNN features ($\mathbb{R}^{10}$) with the eight deterministic morphological biometrics ($\mathbb{R}^{8}$) into a standardized 18-dimensional vector, evaluated across backbone-classifier pairings. 
 
 To optimize the trade-off between feature dimensionality and classification performance, we conducted an empirical grid search over the number of latent deep texture dimensions. While retaining up to 95% of the cumulative embedding variance required over 250 components, classification performance plateaued at 10 components. Higher order dimensions didn't result in any improvement in F1 Score, so PCA dimensionality was empirically fixed at 10 components, capturing 53% of the training dataset variance, providing a balance between computational efficiency and predictive performance. 
 
 Model size is reported as the full deployable pipeline footprint, comprising the ONNX backbone, serialized PCA projection matrix, and trained classifier. 
 
-### Table 4: Phase 4: Proposed MorphNN Hybrid Fusion Full Metric Comparison
+### Table 4: Phase 4: Proposed Morphfuse Hybrid Fusion Full Metric Comparison
 
 <table>
   <thead>
@@ -90,13 +90,13 @@ Model size is reported as the full deployable pipeline footprint, comprising the
       <th colspan="3">Inference (ms/img)</th>
     </tr>
     <tr>
-      <th>MorphNN</th>
+      <th>Morphfuse</th>
       <th>Phase 3</th>
       <th>p</th>
-      <th>MorphNN</th>
+      <th>Morphfuse</th>
       <th>Phase 3</th>
       <th>p</th>
-      <th>MorphNN</th>
+      <th>Morphfuse</th>
       <th>Phase 3</th>
       <th>p</th>
     </tr>
@@ -181,14 +181,14 @@ Model size is reported as the full deployable pipeline footprint, comprising the
       <td>0.049</td>
     </tr>
     <tr>
-      <td colspan="11"><i>MorphNN Pipeline Size (MobileNetV2+RF):</i> 16.1 MB vs. Fine-tuned EfficientNet-B0 (20.5 MB) → <b>21.5% reduction</b></td>
+      <td colspan="11"><i>Morphfuse Pipeline Size (MobileNetV2+RF):</i> 16.1 MB vs. Fine-tuned EfficientNet-B0 (20.5 MB) → <b>21.5% reduction</b></td>
     </tr>
   </tbody>
 </table>
 
 The MobileNetV2+Random Forest configuration achieved the highest macro F1 of 0.953 ± 0.007, surpassing the best fine-tuned model (EfficientNet-B0, 0.941 ± 0.009) with a statistically significant margin (Wilcoxon, $p = 0.031$). Training time collapsed to 14.2 ± 0.6 s, a $22\times$ reduction versus fine-tuned EfficientNet-B0 ($p < 0.001$). Per-image inference latency of 9.8 ± 0.4 ms was significantly lower than the fine-tuned MobileNetV2 baseline (10.1 ± 0.7 ms, $p = 0.043$), while the full deployable pipeline footprint of 16.1 MB was 21.5% smaller than fine-tuned EfficientNet-B0 (20.5 MB) despite achieving superior macro F1. These gains were consistent across all top backbone RF pairings, confirming the robustness of the fusion strategy rather than a configuration-specific artifact.
 
-Relative to the pure morphological baseline (Phase 1 RF, macro F1 = 0.901), MorphNN achieved a +6.0 percentage point improvement ($p < 0.001$), confirming that the PCA-compressed deep texture stream provides statistically significant complementary discriminative information beyond explicit geometric biometrics. Across all four phases, no single competing configuration simultaneously achieved higher macro F1, lower training time, and lower inference latency than MorphNN (MobileNetV2+RF), establishing it as the Pareto-optimal solution within the evaluated design space. 
+Relative to the pure morphological baseline (Phase 1 RF, macro F1 = 0.901), Morphfuse achieved a +6.0 percentage point improvement ($p < 0.001$), confirming that the PCA-compressed deep texture stream provides statistically significant complementary discriminative information beyond explicit geometric biometrics. Across all four phases, no single competing configuration simultaneously achieved higher macro F1, lower training time, and lower inference latency than Morphfuse (MobileNetV2+RF), establishing it as the Pareto-optimal solution within the evaluated design space. 
 
 ![Feature Importance Proposed Model (MobileNetV2+Random Forest)](RandomForest_Decision_XAI_Report.pdf)
 *Figure 2: Feature Importance Proposed Model (MobileNetV2+Random Forest)*
@@ -205,9 +205,9 @@ To independently evaluate generalization, we kept the 196-sample holdout set com
 | Phase 1 | Random Forest (Morphological only) | 0.901 | 19 |
 | Phase 2 | EfficientNet-B0 (Frozen transfer) | 0.934 | 13 |
 | Phase 3 | EfficientNet-B0 (Fine-tuned) | 0.963 | 7 |
-| Phase 4 | MorphNN (MobileNetV2 + RF) **[Ours]** | **0.957** | **8** |
+| Phase 4 | Morphfuse (MobileNetV2 + RF) **[Ours]** | **0.957** | **8** |
 
-MorphNN achieved a holdout macro F1 of 0.957, trailing the fine-tuned EfficientNet-B0 ceiling by only 0.006 and with near equivalent performance to other state-of-the-art methods discussed earlier. This near-parity is particularly notable given that Phase 3 required 312 ± 14.3 s of GPU-assisted fine-tuning and a 20.5 MB deployable footprint to reach its holdout ceiling, whereas MorphNN reached a statistically indistinguishable result in 14.2 ± 0.6 s with a 16.1 MB pipeline and no gradient updates. The consistency between cross-validation macro F1 and holdout macro F1 across all phases further confirms that no phase-level overfitting occurred during model selection. 
+Morphfuse achieved a holdout macro F1 of 0.957, trailing the fine-tuned EfficientNet-B0 ceiling by only 0.006 and with near equivalent performance to other state-of-the-art methods discussed earlier. This near-parity is particularly notable given that Phase 3 required 312 ± 14.3 s of GPU-assisted fine-tuning and a 20.5 MB deployable footprint to reach its holdout ceiling, whereas Morphfuse reached a statistically indistinguishable result in 14.2 ± 0.6 s with a 16.1 MB pipeline and no gradient updates. The consistency between cross-validation macro F1 and holdout macro F1 across all phases further confirms that no phase-level overfitting occurred during model selection. 
 
 ![Confusion Matrix (Hold-out)](confusion_matrices_4phase.pdf)
 *Figure 3: Confusion Matrix (Hold-out)*
@@ -216,25 +216,25 @@ MorphNN achieved a holdout macro F1 of 0.957, trailing the fine-tuned EfficientN
 
 ## Ablation Analysis and Pareto Dominance
 
-Restricting the pipeline to the morphological vector alone (Phase 1 RF) yielded a macro F1 of 0.901; restricting it to frozen deep texture features alone (Phase 2 MobileNetV2) yielded 0.874. The full MorphNN fusion recovered to 0.953, representing absolute improvements of +6.0 and +7.9 percentage points, respectively ($p < 0.001$, Wilcoxon signed-rank). Neither stream is discriminative by itself, but only their combination is discriminative enough.
+Restricting the pipeline to the morphological vector alone (Phase 1 RF) yielded a macro F1 of 0.901; restricting it to frozen deep texture features alone (Phase 2 MobileNetV2) yielded 0.874. The full Morphfuse fusion recovered to 0.953, representing absolute improvements of +6.0 and +7.9 percentage points, respectively ($p < 0.001$, Wilcoxon signed-rank). Neither stream is discriminative by itself, but only their combination is discriminative enough.
 
-**Error Mitigation:** Figure 4 shows how predictions change from the morphological baseline to MorphNN. Adding deep features, MorphNN resolved many of the baseline's confusions, because it correctly reclassified 7 false positive Measles and 4 false positive Chickenpox in Phase 1.
+**Error Mitigation:** Figure 4 shows how predictions change from the morphological baseline to Morphfuse. Adding deep features, Morphfuse resolved many of the baseline's confusions, because it correctly reclassified 7 false positive Measles and 4 false positive Chickenpox in Phase 1.
 
 ![Error mitigation delta matrix](error_resolution_delta.pdf)
-*Figure 4: Error mitigation delta ($\Delta$) matrix between the Phase 1 morphological baseline and the proposed MorphNN framework.*
+*Figure 4: Error mitigation delta ($\Delta$) matrix between the Phase 1 morphological baseline and the proposed Morphfuse framework.*
 
-**Multi-Dimensional Efficiency:** Figure 5 maps all configurations across accuracy, latency, and deployable footprint. End-to-end fine-tuning (Phase 3) incurs substantial training and storage costs for marginal accuracy gains over frozen counterparts. MorphNN (MobileNetV2+RF) occupies a strictly more favorable operating point: highest macro F1 (0.953), $22\times$ faster training than fine-tuned EfficientNet-B0, and a 21.5% smaller full-pipeline footprint (16.1 MB versus 20.5 MB).
+**Multi-Dimensional Efficiency:** Figure 5 maps all configurations across accuracy, latency, and deployable footprint. End-to-end fine-tuning (Phase 3) incurs substantial training and storage costs for marginal accuracy gains over frozen counterparts. Morphfuse (MobileNetV2+RF) occupies a strictly more favorable operating point: highest macro F1 (0.953), $22\times$ faster training than fine-tuned EfficientNet-B0, and a 21.5% smaller full-pipeline footprint (16.1 MB versus 20.5 MB).
 
 ![Three-axis efficiency comparison](tradeoff(1).pdf)
 *Figure 5: Three-axis efficiency comparison (accuracy, latency, deployable footprint)*
 
-**Feature Contribution:** In the case of 20 independent runs of recursive feature elimination, *Confluence_Ratio* and *Avg_Area* are consistently selected as the most discriminant features for the morphological baseline, and for MorphNN, the top features are *CNN_Texture_1* and *Confluence_Ratio*. Furthermore, we found that adding additional features beyond the 18-dimensional vector did not help improve the results, and removing the lower-ranked features resulted in less consistent results from run to run ($p > 0.05$). The computational impact of the most influential features is summarized in Table 6.
+**Feature Contribution:** In the case of 20 independent runs of recursive feature elimination, *Confluence_Ratio* and *Avg_Area* are consistently selected as the most discriminant features for the morphological baseline, and for Morphfuse, the top features are *CNN_Texture_1* and *Confluence_Ratio*. Furthermore, we found that adding additional features beyond the 18-dimensional vector did not help improve the results, and removing the lower-ranked features resulted in less consistent results from run to run ($p > 0.05$). The computational impact of the most influential features is summarized in Table 6.
 
 ### Table 6: Computational impact of dominant features within each framework
 | Model | Dominant Features | Training Time (s) | Inference (ms/img) |
 | :--- | :--- | :--- | :--- |
 | Classical (Phase 1 RF) | Confluence_Ratio, Avg_Area | 3.21 ± 0.18 | 0.31 ± 0.03 |
-| MorphNN (MobileNetV2+RF) | CNN_Texture_1, Confluence_Ratio | 14.2 ± 0.60 | 9.80 ± 0.40 |
+| Morphfuse (MobileNetV2+RF) | CNN_Texture_1, Confluence_Ratio | 14.2 ± 0.60 | 9.80 ± 0.40 |
 
 ---
 
@@ -251,9 +251,9 @@ In contrast, the failure analyses highlight a serious drawback of purely determi
 
 ## Hybrid Architectural Audibility and the CNN Transparency Boundary
 
-Since the CNN backbone is frozen in MorphNN and used exclusively for extracting features without an overhead classifier or active backpropagation, standard interpretation techniques like Grad-CAM cannot be applied. Grad-CAM requires backpropagating gradients from the model's output to the final convolutional feature maps. If implemented here, the maps would reflect the original frozen ImageNet head's representations rather than the downstream Random Forest decision layer, yielding misleading explanations.
+Since the CNN backbone is frozen in Morphfuse and used exclusively for extracting features without an overhead classifier or active backpropagation, standard interpretation techniques like Grad-CAM cannot be applied. Grad-CAM requires backpropagating gradients from the model's output to the final convolutional feature maps. If implemented here, the maps would reflect the original frozen ImageNet head's representations rather than the downstream Random Forest decision layer, yielding misleading explanations.
 
-Critically, this is not a limitation unique to MorphNN; it is a known failure mode of Grad-CAM on fine-tuned models as well, where saliency maps frequently highlight clinically irrelevant background regions. MorphNN instead achieves auditing through a more reliable channel: the Random Forest's global feature importance over the fused 18-dimensional vector (Figure 2). 
+Critically, this is not a limitation unique to Morphfuse; it is a known failure mode of Grad-CAM on fine-tuned models as well, where saliency maps frequently highlight clinically irrelevant background regions. Morphfuse instead achieves auditing through a more reliable channel: the Random Forest's global feature importance over the fused 18-dimensional vector (Figure 2). 
 
 Since the Random Forest is the sole decision-making module, its feature importance provides a stable explanation of model behavior. The top-ranked features, especially *CNN_Texture_1* and *Confluence_Ratio*, show that the CNN stream mainly adds robust texture information, while the morphological features remain the primary, clinically interpretable basis for the decision. 
 
@@ -268,12 +268,12 @@ To characterize real-world micro-architectural behavior under power-constrained 
 
 Phase 1 (Random Forest) completes inference in 0.31 ms, operating entirely within the 2.0 GHz baseline band, confirming that tree-traversal operations bypass power-dense vector execution units entirely. Phases 2 and 3 sustain a heavy-workload footprint at the 2.5 GHz ceiling throughout identical EfficientNet-B0 tensor graph operations, diverging only at pipeline termination (12.1 ms versus 12.8 ms respectively). 
 
-MorphNN (Phase 4) exhibits a characteristic multi-state frequency signature:
+Morphfuse (Phase 4) exhibits a characteristic multi-state frequency signature:
 1. **Morphological extraction** initializes within the 2.0 GHz band ($t < 1.5$ ms).
 2. **Frozen backbone convolutions** transition execution up to the 2.5 GHz tier.
 3. **Downstream pipeline processing** drops immediately back to the 2.0 GHz baseline once deep feature extraction concludes ($t \approx 8.2$ ms) for PCA projection and Random Forest inference.
 
-This state-aware execution reduces total core cycle utilization to 9.8 ms. By the accuracy-to-power-draw criterion, Phase 1 is the most efficient configuration. However, in medical diagnosis, misclassification directly affects patient isolation and outbreak control. Within this context, the ~5% absolute macro F1 gain from MorphNN (0.953 vs. ~0.90) justifies its 9.5 ms overhead. MorphNN is therefore a deliberate trade-off, prioritizing higher classification fidelity over minimal computational cost for infectious disease screening.
+This state-aware execution reduces total core cycle utilization to 9.8 ms. By the accuracy-to-power-draw criterion, Phase 1 is the most efficient configuration. However, in medical diagnosis, misclassification directly affects patient isolation and outbreak control. Within this context, the ~5% absolute macro F1 gain from Morphfuse (0.953 vs. ~0.90) justifies its 9.5 ms overhead. Morphfuse is therefore a deliberate trade-off, prioritizing higher classification fidelity over minimal computational cost for infectious disease screening.
 
 ## Deployment
 
@@ -288,11 +288,11 @@ When a user uploads a clinical image scan, the application immediately generates
 
 Existing lightweight dermatological classifiers predominantly follow one of two paradigms: end-to-end fine-tuned CNNs optimized purely for accuracy, or classical handcrafted pipelines optimized purely for speed. 
 
-MorphNN is comparable to the best fine-tuned architecture (EfficientNet-B0, $\text{F1} = 0.941$) in macro F1 while reducing training time by $22\times$ and full-pipeline footprint by 21.5% (16.1 MB versus 20.5 MB). While the footprint gains are incremental rather than revolutionary, the high accuracy, low training overhead, and GPU-free inference capabilities offered by MorphNN make it truly deployable in resource-constrained clinical settings—a deployment scenario that has not been adequately addressed in the dermatological AI literature.
+Morphfuse is comparable to the best fine-tuned architecture (EfficientNet-B0, $\text{F1} = 0.941$) in macro F1 while reducing training time by $22\times$ and full-pipeline footprint by 21.5% (16.1 MB versus 20.5 MB). While the footprint gains are incremental rather than revolutionary, the high accuracy, low training overhead, and GPU-free inference capabilities offered by Morphfuse make it truly deployable in resource-constrained clinical settings—a deployment scenario that has not been adequately addressed in the dermatological AI literature.
 
 ## Limitations
 
-Despite these gains, the MorphNN model still has some limitations:
+Despite these gains, the Morphfuse model still has some limitations:
 * **Edge-case Confusion:** The confusion matrix (Figure 3) shows remaining Chickenpox–Measles confusion, mainly in atypical cases where lesion patterns deviate from typical morphology and neither morphological nor CNN texture features are fully discriminative. 
 * **Pathological Smoothing:** While the Gray-World hypothesis establishes a standardized neutral baseline, it inherently assumes a balanced color distribution. In dermatological contexts, this assumption risks artificially attenuating pathological erythema (redness) by averaging it into the background. 
 * **Data Diversity:** We only included a single dataset. Expanding the training distribution to include these edge-case presentations, or incorporating domain-specific fine-tuning of a shallow adapter layer, represents a natural extension of this work.
